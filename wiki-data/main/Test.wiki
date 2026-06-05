@@ -1,6 +1,4 @@
 Epic game!
 
-{{Infobox
-| name = Test Man
-| image = https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg
-}}
+
+Test Man
