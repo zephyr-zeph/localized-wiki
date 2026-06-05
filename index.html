@@ -1,0 +1,2295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WikiForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   THEME SYSTEM — edit presets or override below
+   ═══════════════════════════════════════════════ */
+:root {
+  --bg:         #0e0e10;
+  --bg2:        #161618;
+  --bg3:        #1e1e21;
+  --border:     #2a2a2e;
+  --border2:    #3a3a40;
+  --text:       #e8e8ec;
+  --text2:      #9898a6;
+  --text3:      #5c5c6e;
+  --accent:     #7c6af7;
+  --accent2:    #a89af9;
+  --accent-bg:  #1a1730;
+  --danger:     #e05a5a;
+  --success:    #4caf7d;
+  --warn:       #e8a23c;
+  --link:       #7c9ef7;
+  --link-hover: #a8bef9;
+  --radius:     6px;
+  --radius-lg:  10px;
+  --font-ui:    'DM Sans', system-ui, sans-serif;
+  --font-body:  'Crimson Pro', Georgia, serif;
+  --font-mono:  'JetBrains Mono', monospace;
+  --sidebar-w:  240px;
+  --header-h:   52px;
+}
+
+/* ── PRESET THEMES (swap by setting data-theme on <html>) ── */
+[data-theme="light"] {
+  --bg: #fafafa; --bg2: #ffffff; --bg3: #f0f0f4;
+  --border: #e0e0e8; --border2: #c8c8d4;
+  --text: #1a1a2e; --text2: #4a4a6a; --text3: #8888aa;
+  --accent: #5c4de8; --accent2: #7c6af7; --accent-bg: #ede9ff;
+  --link: #2a6db5; --link-hover: #1a4a8a;
+}
+[data-theme="forest"] {
+  --bg: #0d1310; --bg2: #131a15; --bg3: #1a2218;
+  --border: #253020; --border2: #35452a;
+  --text: #d8e8d0; --text2: #8aaa80; --text3: #4a6042;
+  --accent: #5caa60; --accent2: #7aca7e; --accent-bg: #142018;
+  --link: #6aaa88; --link-hover: #8acaa8;
+}
+[data-theme="ocean"] {
+  --bg: #080d18; --bg2: #0d1428; --bg3: #121c35;
+  --border: #1a2845; --border2: #253a5e;
+  --text: #d0e0f8; --text2: #7090c0; --text3: #3a5080;
+  --accent: #3a78e8; --accent2: #5a98f8; --accent-bg: #0d1e48;
+  --link: #4a90d8; --link-hover: #6ab0f8;
+}
+[data-theme="crimson"] {
+  --bg: #100808; --bg2: #180d0d; --bg3: #201212;
+  --border: #301818; --border2: #482020;
+  --text: #f0dada; --text2: #c08080; --text3: #704848;
+  --accent: #d84040; --accent2: #f06060; --accent-bg: #280f0f;
+  --link: #d87050; --link-hover: #f09070;
+}
+[data-theme="paper"] {
+  --bg: #f5f0e8; --bg2: #faf7f0; --bg3: #ece8dc;
+  --border: #d8d0c0; --border2: #c0b898;
+  --text: #2a2018; --text2: #6a5840; --text3: #9a8870;
+  --accent: #8b4a1a; --accent2: #b06030; --accent-bg: #f0e0d0;
+  --link: #5a3090; --link-hover: #3a1870;
+  --font-body: 'Crimson Pro', Georgia, serif;
+}
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.5;
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--link-hover); text-decoration: underline; }
+button { font-family: var(--font-ui); cursor: pointer; border: none; background: none; color: var(--text); }
+input, textarea, select {
+  font-family: var(--font-ui);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s;
+}
+input:focus, textarea:focus { border-color: var(--accent); }
+select option { background: var(--bg2); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════ */
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ── Header ── */
+#header {
+  height: var(--header-h);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+#logo {
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+#logo span { color: var(--accent); }
+#wiki-title-display {
+  font-size: 13px;
+  color: var(--text3);
+  padding: 0 8px;
+  border-left: 1px solid var(--border2);
+}
+.header-spacer { flex: 1; }
+#search-wrap { position: relative; }
+#search-input {
+  width: 220px;
+  padding-left: 28px;
+  background: var(--bg3);
+}
+#search-icon {
+  position: absolute;
+  left: 8px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  font-size: 13px;
+  pointer-events: none;
+}
+#search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0; right: 0;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: none;
+  z-index: 200;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.search-result-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.search-result-item:hover { background: var(--bg3); }
+.search-result-item .sr-wiki { color: var(--text3); font-size: 11px; }
+#header-actions { display: flex; align-items: center; gap: 6px; }
+.hbtn {
+  padding: 5px 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  transition: background .15s;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+.hbtn:hover { background: var(--bg3); color: var(--text); }
+.hbtn.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.hbtn.primary:hover { opacity: .85; }
+#user-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  font-size: 12px;
+  color: var(--accent2);
+  cursor: pointer;
+}
+
+/* ── Body split ── */
+#body { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Sidebar ── */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width .2s;
+}
+#sidebar.collapsed { width: 0; }
+#sidebar-inner { overflow-y: auto; flex: 1; padding: 12px 0; }
+.sidebar-section { margin-bottom: 4px; }
+.sidebar-section-header {
+  padding: 6px 14px;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-section-header button {
+  font-size: 16px;
+  color: var(--text3);
+  line-height: 1;
+  padding: 0;
+}
+.sidebar-section-header button:hover { color: var(--accent); }
+.sidebar-item {
+  padding: 5px 14px 5px 16px;
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-left: 2px solid transparent;
+  transition: all .12s;
+  text-decoration: none;
+}
+.sidebar-item:hover { color: var(--text); background: var(--bg3); text-decoration: none; }
+.sidebar-item.active { color: var(--accent2); border-left-color: var(--accent); background: var(--accent-bg); }
+.sidebar-item .si-wiki {
+  font-size: 10px;
+  color: var(--text3);
+  margin-left: auto;
+}
+.wiki-selector {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.wiki-selector select { width: 100%; }
+.sidebar-toggle-btn {
+  position: absolute;
+  left: var(--sidebar-w);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 40px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  font-size: 10px;
+  color: var(--text3);
+  transition: left .2s;
+}
+#sidebar.collapsed + #main-area .sidebar-toggle-btn { left: 0; }
+
+/* ── Main ── */
+#main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+#page-content { flex: 1; overflow-y: auto; padding: 0; }
+
+/* ── Page view ── */
+#page-view { max-width: 860px; margin: 0 auto; padding: 32px 40px 80px; }
+.page-header {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+}
+.page-header h1 {
+  font-family: var(--font-body);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  color: var(--text);
+}
+.page-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text3);
+}
+.page-meta span { display: flex; align-items: center; gap: 4px; }
+.page-actions { display: flex; gap: 6px; margin-left: auto; }
+.page-actions button {
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  transition: all .12s;
+}
+.page-actions button:hover { background: var(--bg3); color: var(--text); }
+.page-actions button.edit-btn {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.page-actions button.edit-btn:hover { opacity: .85; }
+
+/* ── Wiki content rendering ── */
+.wiki-content {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--text);
+}
+.wiki-content h1, .wiki-content h2, .wiki-content h3,
+.wiki-content h4, .wiki-content h5 {
+  font-family: var(--font-body);
+  color: var(--text);
+  margin: 1.6em 0 .5em;
+  font-weight: 600;
+}
+.wiki-content h2 {
+  font-size: 22px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+.wiki-content h3 { font-size: 18px; }
+.wiki-content p { margin-bottom: .9em; }
+.wiki-content ul, .wiki-content ol { padding-left: 24px; margin-bottom: .9em; }
+.wiki-content li { margin-bottom: .3em; }
+.wiki-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 6px 16px;
+  color: var(--text2);
+  margin: 1em 0;
+  background: var(--bg3);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.wiki-content code {
+  font-family: var(--font-mono);
+  font-size: .82em;
+  background: var(--bg3);
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: var(--accent2);
+}
+.wiki-content pre {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+.wiki-content pre code { background: none; padding: 0; font-size: .88em; }
+.wiki-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 15px;
+}
+.wiki-content th {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.wiki-content td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+}
+.wiki-content tr:hover td { background: var(--bg3); }
+.wiki-content img { max-width: 100%; border-radius: var(--radius); margin: .5em 0; }
+.wiki-content hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.wiki-link { color: var(--link); }
+.wiki-link.redlink { color: var(--danger); }
+.wiki-link:hover { text-decoration: underline; }
+.wiki-toc {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  display: inline-block;
+  min-width: 200px;
+  max-width: 320px;
+  margin: 0 0 1.5em;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+.wiki-toc-title { font-weight: 600; margin-bottom: 8px; font-size: 13px; }
+.wiki-toc ol { padding-left: 18px; }
+.wiki-toc li { margin: 3px 0; }
+.wiki-toc a { color: var(--text2); }
+.wiki-toc a:hover { color: var(--link); }
+.wiki-infobox {
+  float: right;
+  margin: 0 0 16px 24px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  min-width: 220px;
+  max-width: 280px;
+  overflow: hidden;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+.wiki-infobox-title {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 13px;
+}
+.wiki-infobox table { width: 100%; font-size: 12px; margin: 0; }
+.wiki-infobox th { font-size: 11px; padding: 5px 8px; }
+.wiki-infobox td { padding: 5px 8px; }
+.wiki-categories {
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text3);
+}
+.wiki-categories span { color: var(--text2); font-weight: 500; }
+.wiki-cat-link { color: var(--link); margin: 0 4px; }
+
+/* ── Editor ── */
+#editor-wrap {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+}
+#editor-wrap.visible { display: flex; }
+#editor-toolbar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.tb-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border2);
+  margin: 0 4px;
+}
+.tb-btn {
+  padding: 4px 7px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text2);
+  border: 1px solid transparent;
+  transition: all .1s;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+}
+.tb-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+.tb-btn.active { background: var(--accent-bg); color: var(--accent2); border-color: var(--accent); }
+.tb-btn.danger { color: var(--danger); }
+.tb-btn.success { color: var(--success); }
+.tb-mode-switch {
+  margin-left: auto;
+  display: flex;
+  background: var(--bg3);
+  border-radius: var(--radius);
+  padding: 2px;
+  border: 1px solid var(--border);
+}
+.tb-mode-btn {
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  transition: all .15s;
+}
+.tb-mode-btn.active { background: var(--bg2); color: var(--text); }
+#editor-body { flex: 1; display: flex; overflow: hidden; }
+#visual-editor {
+  flex: 1;
+  padding: 32px 40px;
+  overflow-y: auto;
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--text);
+  outline: none;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+#visual-editor:empty::before {
+  content: 'Start writing…';
+  color: var(--text3);
+  pointer-events: none;
+}
+#source-editor {
+  flex: 1;
+  padding: 24px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  background: var(--bg);
+  color: var(--text);
+  border: none;
+  outline: none;
+  resize: none;
+  display: none;
+}
+#source-editor.visible { display: block; }
+#editor-footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+#editor-summary {
+  flex: 1;
+  max-width: 360px;
+}
+#editor-summary::placeholder { color: var(--text3); }
+.editor-footer-actions { display: flex; gap: 8px; margin-left: auto; }
+.editor-footer-actions button {
+  padding: 6px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  transition: all .12s;
+}
+.editor-footer-actions button:hover { background: var(--bg3); color: var(--text); }
+.editor-footer-actions .save-btn {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.editor-footer-actions .save-btn:hover { opacity: .85; }
+.editor-footer-actions .save-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Insert link/image dialog */
+.inline-dialog {
+  display: none;
+  position: absolute;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  z-index: 300;
+  min-width: 280px;
+  gap: 8px;
+  flex-direction: column;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.inline-dialog.visible { display: flex; }
+.inline-dialog label { font-size: 11px; color: var(--text3); margin-bottom: -4px; }
+.inline-dialog input { width: 100%; }
+.inline-dialog-actions { display: flex; gap: 6px; margin-top: 4px; }
+.inline-dialog-actions button {
+  flex: 1; padding: 5px; border-radius: var(--radius);
+  font-size: 12px; border: 1px solid var(--border2); color: var(--text2);
+}
+.inline-dialog-actions .ok { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* ── Modals ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.visible { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 420px;
+  max-width: 96vw;
+}
+.modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.modal-field { margin-bottom: 12px; }
+.modal-field label { display: block; font-size: 12px; color: var(--text3); margin-bottom: 4px; }
+.modal-field input, .modal-field select { width: 100%; }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+.modal-actions button {
+  padding: 7px 18px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  transition: all .12s;
+}
+.modal-actions button:hover { background: var(--bg3); color: var(--text); }
+.modal-actions .confirm { background: var(--accent); color: #fff; border-color: var(--accent); }
+.modal-actions .danger-btn { background: var(--danger); color: #fff; border-color: var(--danger); }
+.modal-error { font-size: 12px; color: var(--danger); margin-top: 8px; min-height: 16px; }
+
+/* ── Settings panel ── */
+#settings-panel {
+  display: none;
+  position: fixed;
+  top: var(--header-h);
+  right: 0;
+  width: 320px;
+  height: calc(100vh - var(--header-h));
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  z-index: 200;
+  overflow-y: auto;
+  flex-direction: column;
+}
+#settings-panel.visible { display: flex; }
+.settings-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.settings-header h3 { font-size: 14px; font-weight: 600; }
+.settings-section { padding: 16px; border-bottom: 1px solid var(--border); }
+.settings-section h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: 12px; }
+.settings-row { margin-bottom: 10px; }
+.settings-row label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.settings-row input, .settings-row select, .settings-row textarea { width: 100%; }
+.settings-row textarea { resize: vertical; min-height: 60px; font-size: 12px; }
+.theme-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.theme-preset-btn {
+  padding: 6px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.theme-preset-btn:hover, .theme-preset-btn.active { border-color: var(--accent); color: var(--accent2); }
+.css-override { margin-top: 8px; }
+.css-override textarea { font-family: var(--font-mono); font-size: 11px; }
+.settings-section button.full-btn {
+  width: 100%;
+  padding: 7px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  margin-bottom: 6px;
+  text-align: left;
+}
+.settings-section button.full-btn:hover { background: var(--bg3); color: var(--text); }
+
+/* ── Toast ── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 10px 18px;
+  font-size: 13px;
+  color: var(--text);
+  z-index: 1000;
+  opacity: 0;
+  transition: all .2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.success { border-color: var(--success); color: var(--success); }
+#toast.error { border-color: var(--danger); color: var(--danger); }
+
+/* ── History view ── */
+#history-view { max-width: 860px; margin: 0 auto; padding: 32px 40px; }
+.history-item {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.history-item .hi-sha { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
+.history-item .hi-msg { flex: 1; }
+.history-item .hi-date { color: var(--text3); font-size: 11px; }
+.history-item .hi-author { color: var(--accent2); }
+.restore-btn { padding: 3px 8px; border-radius: 3px; font-size: 11px; border: 1px solid var(--border2); color: var(--text3); }
+.restore-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* ── Home / Dashboard ── */
+#home-view { max-width: 860px; margin: 0 auto; padding: 32px 40px; }
+.home-hero { margin-bottom: 32px; }
+.home-hero h1 { font-family: var(--font-body); font-size: 36px; font-weight: 600; margin-bottom: 8px; }
+.home-hero p { color: var(--text2); font-size: 15px; }
+.home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.home-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.home-card h3 { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
+.home-card-item {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.home-card-item:last-child { border-bottom: none; }
+.home-card-item:hover { color: var(--link); }
+.home-card-item .hci-meta { margin-left: auto; font-size: 11px; color: var(--text3); }
+
+/* ── GitHub config status ── */
+.gh-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.gh-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--danger); }
+.gh-dot.ok { background: var(--success); }
+
+/* ── Loading ── */
+.loading { display: flex; align-items: center; justify-content: center; padding: 60px; color: var(--text3); gap: 10px; font-size: 14px; }
+.spinner { width: 18px; height: 18px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Diff view ── */
+.diff-add { background: rgba(76,175,125,.15); color: var(--success); }
+.diff-del { background: rgba(224,90,90,.15); color: var(--danger); text-decoration: line-through; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- ═══ HEADER ═══ -->
+  <div id="header">
+    <a id="logo" href="#" onclick="WikiApp.navigate('home');return false;">
+      Wiki<span>Forge</span>
+    </a>
+    <span id="wiki-title-display"></span>
+    <div class="header-spacer"></div>
+    <div id="search-wrap">
+      <span id="search-icon">🔍</span>
+      <input id="search-input" type="text" placeholder="Search pages…" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
+    <div id="header-actions">
+      <button class="hbtn" onclick="WikiApp.navigate('home')">🏠 Home</button>
+      <div id="user-area"></div>
+    </div>
+    <button class="hbtn" title="Settings" onclick="WikiApp.toggleSettings()">⚙️</button>
+  </div>
+
+  <!-- ═══ BODY ═══ -->
+  <div id="body">
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <div class="wiki-selector">
+        <select id="wiki-select" onchange="WikiApp.switchWiki(this.value)">
+          <option value="">Loading wikis…</option>
+        </select>
+      </div>
+      <div id="sidebar-inner">
+        <div class="sidebar-section">
+          <div class="sidebar-section-header">
+            Navigation
+          </div>
+          <div id="sidebar-nav"></div>
+        </div>
+        <div class="sidebar-section" id="categories-section" style="display:none">
+          <div class="sidebar-section-header">Categories</div>
+          <div id="sidebar-cats"></div>
+        </div>
+      </div>
+      <div style="padding: 10px 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text3);">
+        WikiForge v1.0
+      </div>
+    </div>
+
+    <!-- Main area -->
+    <div id="main-area">
+      <div id="page-content">
+        <!-- HOME -->
+        <div id="home-view" style="display:none"></div>
+        <!-- PAGE VIEW -->
+        <div id="page-view" style="display:none"></div>
+        <!-- HISTORY -->
+        <div id="history-view" style="display:none"></div>
+        <!-- LOADING -->
+        <div id="loading-view" class="loading" style="display:none">
+          <div class="spinner"></div> Loading…
+        </div>
+      </div>
+      <!-- EDITOR (outside page-content so it can be full height) -->
+      <div id="editor-wrap">
+        <div id="editor-toolbar">
+          <!-- Formatting -->
+          <button class="tb-btn" title="Bold (Ctrl+B)" onclick="Wiki.exec('bold')"><b>B</b></button>
+          <button class="tb-btn" title="Italic (Ctrl+I)" onclick="Wiki.exec('italic')"><i>I</i></button>
+          <button class="tb-btn" title="Underline (Ctrl+U)" onclick="Wiki.exec('underline')"><u>U</u></button>
+          <button class="tb-btn" title="Strikethrough" onclick="Wiki.exec('strikeThrough')"><s>S</s></button>
+          <div class="tb-sep"></div>
+          <!-- Headings -->
+          <select id="heading-select" style="height:28px;padding:0 6px;font-size:12px" onchange="Wiki.applyHeading(this.value);this.value=''">
+            <option value="">Heading</option>
+            <option value="h2">H2</option>
+            <option value="h3">H3</option>
+            <option value="h4">H4</option>
+          </select>
+          <div class="tb-sep"></div>
+          <!-- Lists -->
+          <button class="tb-btn" title="Bullet list" onclick="Wiki.exec('insertUnorderedList')">• List</button>
+          <button class="tb-btn" title="Numbered list" onclick="Wiki.exec('insertOrderedList')">1. List</button>
+          <button class="tb-btn" title="Blockquote" onclick="Wiki.exec('formatBlock','blockquote')">" Quote</button>
+          <div class="tb-sep"></div>
+          <!-- Insert -->
+          <button class="tb-btn" title="Insert link" onclick="Wiki.showLinkDialog()">🔗 Link</button>
+          <button class="tb-btn" title="Insert wiki link" onclick="Wiki.showWikiLinkDialog()">[[W]]</button>
+          <button class="tb-btn" title="Insert image" onclick="Wiki.showImageDialog()">🖼 Image</button>
+          <button class="tb-btn" title="Insert table" onclick="Wiki.insertTable()">⊞ Table</button>
+          <button class="tb-btn" title="Insert code block" onclick="Wiki.insertCode()">⌥ Code</button>
+          <button class="tb-btn" title="Insert infobox" onclick="Wiki.insertInfobox()">📋 Infobox</button>
+          <div class="tb-sep"></div>
+          <button class="tb-btn" title="Horizontal rule" onclick="Wiki.exec('insertHorizontalRule')">― HR</button>
+          <!-- Mode switch -->
+          <div class="tb-mode-switch">
+            <button class="tb-mode-btn active" id="mode-visual" onclick="Wiki.setMode('visual')">Visual</button>
+            <button class="tb-mode-btn" id="mode-source" onclick="Wiki.setMode('source')">Source</button>
+          </div>
+        </div>
+        <div id="editor-body">
+          <div id="visual-editor" contenteditable="true" spellcheck="true"></div>
+          <textarea id="source-editor" placeholder="Write in MediaWiki-style markup…"></textarea>
+        </div>
+        <!-- Inline dialogs -->
+        <div id="link-dialog" class="inline-dialog" style="top:44px;left:260px">
+          <label>URL</label>
+          <input id="link-url" type="url" placeholder="https://…">
+          <label>Label (optional)</label>
+          <input id="link-label" type="text" placeholder="Link text">
+          <div class="inline-dialog-actions">
+            <button onclick="Wiki.closeLinkDialog()">Cancel</button>
+            <button class="ok" onclick="Wiki.insertLink()">Insert</button>
+          </div>
+        </div>
+        <div id="wiki-link-dialog" class="inline-dialog" style="top:44px;left:380px">
+          <label>Page name</label>
+          <input id="wl-page" type="text" placeholder="Page Name">
+          <label>Display text (optional)</label>
+          <input id="wl-label" type="text" placeholder="Same as page name">
+          <div class="inline-dialog-actions">
+            <button onclick="Wiki.closeWikiLinkDialog()">Cancel</button>
+            <button class="ok" onclick="Wiki.insertWikiLink()">Insert</button>
+          </div>
+        </div>
+        <div id="image-dialog" class="inline-dialog" style="top:44px;left:440px">
+          <label>Image URL</label>
+          <input id="img-url" type="url" placeholder="https://…/image.png">
+          <label>Alt text</label>
+          <input id="img-alt" type="text" placeholder="Description">
+          <div class="inline-dialog-actions">
+            <button onclick="Wiki.closeImageDialog()">Cancel</button>
+            <button class="ok" onclick="Wiki.insertImage()">Insert</button>
+          </div>
+        </div>
+        <div id="editor-footer">
+          <input id="editor-summary" type="text" placeholder="Edit summary (describe your change)…">
+          <div class="editor-footer-actions">
+            <button onclick="Wiki.cancelEdit()">Cancel</button>
+            <button onclick="WikiApp.navigate('view',WikiApp.currentPage)">Preview</button>
+            <button class="save-btn" id="save-btn" onclick="Wiki.save()">💾 Save page</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS PANEL ═══ -->
+<div id="settings-panel">
+  <div class="settings-header">
+    <h3>⚙️ Settings</h3>
+    <button onclick="WikiApp.toggleSettings()" style="font-size:18px;color:var(--text3)">×</button>
+  </div>
+  <div class="settings-section">
+    <h4>GitHub Connection</h4>
+    <div id="gh-status-display" class="gh-status">
+      <span class="gh-dot" id="gh-dot"></span>
+      <span id="gh-status-text">Not configured</span>
+    </div>
+    <div class="settings-row">
+      <label>Repository (owner/repo)</label>
+      <input id="cfg-repo" type="text" placeholder="username/my-wiki">
+    </div>
+    <div class="settings-row">
+      <label>Branch</label>
+      <input id="cfg-branch" type="text" placeholder="main">
+    </div>
+    <div class="settings-row">
+      <label>Wiki data folder path</label>
+      <input id="cfg-path" type="text" placeholder="wiki-data">
+    </div>
+    <div class="settings-row" id="pat-row">
+      <label>Personal Access Token (PAT) <span style="color:var(--text3)">(editor only)</span></label>
+      <input id="cfg-pat" type="password" placeholder="ghp_…">
+    </div>
+    <div class="modal-error" id="gh-error"></div>
+    <button class="full-btn" onclick="WikiApp.saveGithubConfig()">✓ Save & connect</button>
+    <button class="full-btn" onclick="WikiApp.testGithubConnection()">⚡ Test connection</button>
+  </div>
+  <div class="settings-section">
+    <h4>Theme</h4>
+    <div class="theme-presets" id="theme-presets">
+      <button class="theme-preset-btn active" data-theme="" onclick="WikiApp.setTheme('')">Dark</button>
+      <button class="theme-preset-btn" data-theme="light" onclick="WikiApp.setTheme('light')">Light</button>
+      <button class="theme-preset-btn" data-theme="forest" onclick="WikiApp.setTheme('forest')">Forest</button>
+      <button class="theme-preset-btn" data-theme="ocean" onclick="WikiApp.setTheme('ocean')">Ocean</button>
+      <button class="theme-preset-btn" data-theme="crimson" onclick="WikiApp.setTheme('crimson')">Crimson</button>
+      <button class="theme-preset-btn" data-theme="paper" onclick="WikiApp.setTheme('paper')">Paper</button>
+    </div>
+    <div class="css-override settings-row">
+      <label>Custom CSS override</label>
+      <textarea id="custom-css" rows="4" placeholder=":root { --accent: #ff6b6b; }&#10;.wiki-content h2 { color: pink; }"></textarea>
+      <button class="full-btn" style="margin-top:6px" onclick="WikiApp.applyCustomCSS()">Apply CSS</button>
+    </div>
+  </div>
+  <div class="settings-section" id="admin-settings" style="display:none">
+    <h4>Admin</h4>
+    <button class="full-btn" onclick="WikiApp.showNewWikiModal()">+ Create new wiki</button>
+    <button class="full-btn" onclick="WikiApp.showManageAccountsModal()">👥 Manage accounts</button>
+    <button class="full-btn" onclick="WikiApp.showWikiSettingsModal()">✏️ Wiki settings</button>
+    <button class="full-btn danger-btn" style="color:var(--danger)" onclick="WikiApp.deletePage()">🗑 Delete current page</button>
+  </div>
+  <div class="settings-section">
+    <h4>Account</h4>
+    <div id="settings-user-info" style="font-size:13px;color:var(--text2);margin-bottom:10px"></div>
+    <button class="full-btn" onclick="WikiApp.logout()">Sign out</button>
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Login -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal">
+    <h2>🔐 Sign in to WikiForge</h2>
+    <div class="modal-field">
+      <label>Username</label>
+      <input id="login-user" type="text" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="modal-field">
+      <label>Password</label>
+      <input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="modal-error" id="login-error"></div>
+    <div class="modal-actions">
+      <button onclick="WikiApp.closeLoginModal()">Cancel</button>
+      <button class="confirm" onclick="WikiApp.doLogin()">Sign in</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:12px">
+      Only pre-configured accounts can sign in. Contact your wiki admin for access.
+    </p>
+  </div>
+</div>
+
+<!-- New page -->
+<div class="modal-overlay" id="new-page-modal">
+  <div class="modal">
+    <h2>📄 New Page</h2>
+    <div class="modal-field">
+      <label>Wiki</label>
+      <select id="np-wiki" style="width:100%"></select>
+    </div>
+    <div class="modal-field">
+      <label>Page title</label>
+      <input id="np-title" type="text" placeholder="Page Name">
+    </div>
+    <div class="modal-field">
+      <label>Category (optional)</label>
+      <input id="np-category" type="text" placeholder="Characters, Lore, etc.">
+    </div>
+    <div class="modal-error" id="np-error"></div>
+    <div class="modal-actions">
+      <button onclick="WikiApp.closeModal('new-page-modal')">Cancel</button>
+      <button class="confirm" onclick="WikiApp.createPage()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- New wiki -->
+<div class="modal-overlay" id="new-wiki-modal">
+  <div class="modal">
+    <h2>🌐 Create New Wiki</h2>
+    <div class="modal-field">
+      <label>Wiki ID (lowercase, no spaces)</label>
+      <input id="nw-id" type="text" placeholder="my-wiki">
+    </div>
+    <div class="modal-field">
+      <label>Wiki name</label>
+      <input id="nw-name" type="text" placeholder="My Awesome Wiki">
+    </div>
+    <div class="modal-field">
+      <label>Description</label>
+      <input id="nw-desc" type="text" placeholder="A wiki about…">
+    </div>
+    <div class="modal-error" id="nw-error"></div>
+    <div class="modal-actions">
+      <button onclick="WikiApp.closeModal('new-wiki-modal')">Cancel</button>
+      <button class="confirm" onclick="WikiApp.createWiki()">Create wiki</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <h2>🗑 Delete page?</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px">This will permanently delete "<span id="delete-page-name"></span>". This cannot be undone.</p>
+    <div class="modal-actions">
+      <button onclick="WikiApp.closeModal('delete-modal')">Cancel</button>
+      <button class="danger-btn" onclick="WikiApp.confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   WIKIFORGE — CONFIGURATION
+   Edit this section to add/change accounts and wikis.
+   Passwords are SHA-256 hashed. To generate a hash:
+   open browser console and run:
+     await crypto.subtle.digest('SHA-256',
+       new TextEncoder().encode('yourpassword')
+     ).then(b => [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''))
+   ═══════════════════════════════════════════════════════════ */
+const WIKI_CONFIG = {
+  // ── ACCOUNTS ──────────────────────────────────────────────
+  // role: "admin" (full access) | "editor" (edit existing + create) | "viewer" (read only)
+  accounts: [
+    {
+      username: "admin",
+      // Default password: "admin123" — CHANGE THIS before deploying!
+      passwordHash: "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+      role: "admin",
+      displayName: "Admin"
+    },
+    {
+      username: "editor",
+      // Default password: "editor123" — CHANGE THIS before deploying!
+      passwordHash: "9ebb3df4d2d93f6bc10fba2fe3d0af2e75a41bbd3765b9bda1c21ea1deb21e87",
+      role: "editor",
+      displayName: "Editor"
+    }
+    // Add more accounts here:
+    // { username: "alice", passwordHash: "...", role: "editor", displayName: "Alice" }
+  ],
+
+  // ── WIKI LIST ─────────────────────────────────────────────
+  // These are the wikis available. ID must match folder name in GitHub.
+  // Admins can create new wikis from the Settings panel.
+  wikis: [
+    { id: "main", name: "Main Wiki", description: "The main wiki" }
+  ],
+
+  // ── SITE SETTINGS ────────────────────────────────────────
+  siteName: "WikiForge",
+  allowPublicRead: true,   // false = require login to read
+  defaultWiki: "main"
+};
+/* ══ END CONFIG ══════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════
+   GITHUB API
+   ═══════════════════════════════════════════════════════════ */
+const GH = {
+  get repo()   { return localStorage.getItem('wf_repo') || ''; },
+  get branch() { return localStorage.getItem('wf_branch') || 'main'; },
+  get path()   { return (localStorage.getItem('wf_path') || 'wiki-data').replace(/^\//,'').replace(/\/$/,''); },
+  get pat()    { return localStorage.getItem('wf_pat') || ''; },
+
+  headers(write=false) {
+    const h = { 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' };
+    if (write && this.pat) h['Authorization'] = `token ${this.pat}`;
+    else if (this.pat) h['Authorization'] = `token ${this.pat}`;
+    return h;
+  },
+
+  url(filePath) {
+    return `https://api.github.com/repos/${this.repo}/contents/${this.path}/${filePath}?ref=${this.branch}`;
+  },
+
+  async getFile(filePath) {
+    const r = await fetch(this.url(filePath), { headers: this.headers() });
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error(`GitHub ${r.status}: ${r.statusText}`);
+    const data = await r.json();
+    return { content: atob(data.content.replace(/\n/g,'')), sha: data.sha };
+  },
+
+  async putFile(filePath, content, message, sha=null) {
+    const body = {
+      message,
+      content: btoa(unescape(encodeURIComponent(content))),
+      branch: this.branch
+    };
+    if (sha) body.sha = sha;
+    const r = await fetch(
+      `https://api.github.com/repos/${this.repo}/contents/${this.path}/${filePath}`,
+      { method: 'PUT', headers: this.headers(true), body: JSON.stringify(body) }
+    );
+    if (!r.ok) {
+      const err = await r.json().catch(()=>({}));
+      throw new Error(err.message || `GitHub ${r.status}`);
+    }
+    return r.json();
+  },
+
+  async deleteFile(filePath, message, sha) {
+    const r = await fetch(
+      `https://api.github.com/repos/${this.repo}/contents/${this.path}/${filePath}`,
+      { method: 'DELETE', headers: this.headers(true),
+        body: JSON.stringify({ message, sha, branch: this.branch }) }
+    );
+    if (!r.ok) throw new Error(`GitHub ${r.status}`);
+  },
+
+  async listDir(dirPath='') {
+    const url = `https://api.github.com/repos/${this.repo}/contents/${this.path}${dirPath?'/'+dirPath:''}?ref=${this.branch}`;
+    const r = await fetch(url, { headers: this.headers() });
+    if (r.status === 404) return [];
+    if (!r.ok) throw new Error(`GitHub ${r.status}`);
+    return r.json();
+  },
+
+  async getHistory(filePath) {
+    const url = `https://api.github.com/repos/${this.repo}/commits?path=${this.path}/${filePath}&sha=${this.branch}&per_page=20`;
+    const r = await fetch(url, { headers: this.headers() });
+    if (!r.ok) return [];
+    return r.json();
+  }
+};
+
+
+/* ═══════════════════════════════════════════════════════════
+   AUTH
+   ═══════════════════════════════════════════════════════════ */
+const Auth = {
+  get current() {
+    try { return JSON.parse(sessionStorage.getItem('wf_user')) || null; }
+    catch { return null; }
+  },
+  set current(u) {
+    if (u) sessionStorage.setItem('wf_user', JSON.stringify(u));
+    else sessionStorage.removeItem('wf_user');
+  },
+  get isLoggedIn() { return !!this.current; },
+  get canEdit()    { return this.current && ['admin','editor'].includes(this.current.role); },
+  get isAdmin()    { return this.current?.role === 'admin'; },
+
+  async hashPassword(pass) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+    return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
+  },
+
+  async login(username, password) {
+    const hash = await this.hashPassword(password);
+    const account = WIKI_CONFIG.accounts.find(
+      a => a.username.toLowerCase() === username.toLowerCase() && a.passwordHash === hash
+    );
+    if (!account) return false;
+    this.current = { username: account.username, role: account.role, displayName: account.displayName };
+    return true;
+  },
+
+  logout() { this.current = null; }
+};
+
+
+/* ═══════════════════════════════════════════════════════════
+   WIKITEXT PARSER  (MediaWiki-style → HTML)
+   ═══════════════════════════════════════════════════════════ */
+const Parser = {
+  parse(wikitext, existingPages=[]) {
+    let t = wikitext;
+
+    // Strip HTML comments
+    t = t.replace(/<!--[\s\S]*?-->/g, '');
+
+    // __TOC__ / __NOTOC__
+    const hasToc = t.includes('__TOC__');
+    t = t.replace(/__TOC__|__NOTOC__/g, '');
+
+    // Templates — basic {{Infobox ...}} support
+    t = t.replace(/\{\{Infobox([^}]*)\}\}/gis, (_, body) => {
+      const lines = body.trim().split('\n').filter(l=>l.trim());
+      let title = '', rows = '';
+      lines.forEach(line => {
+        const m = line.match(/^\s*\|\s*([^=]+?)\s*=\s*(.+?)\s*$/);
+        if (!m) { if (line.includes('|')) title = line.replace(/\|/g,'').trim(); return; }
+        const [,k,v] = m;
+        if (k.toLowerCase()==='name') title = v;
+        else rows += `<tr><th>${k}</th><td>${v}</td></tr>`;
+      });
+      return `<div class="wiki-infobox"><div class="wiki-infobox-title">${title}</div><table>${rows}</table></div>`;
+    });
+
+    // Headings
+    t = t.replace(/^====(.+?)====\s*$/gm, (_,x)=>`<h4>${x.trim()}</h4>`);
+    t = t.replace(/^===(.+?)===\s*$/gm,  (_,x)=>`<h3>${x.trim()}</h3>`);
+    t = t.replace(/^==(.+?)==\s*$/gm,    (_,x)=>`<h2>${x.trim()}</h2>`);
+    t = t.replace(/^=(.+?)=\s*$/gm,      (_,x)=>`<h1>${x.trim()}</h1>`);
+
+    // Extract headings for TOC
+    const headings = [];
+    t.replace(/<h([23])>(.+?)<\/h\1>/g, (_,level,text) => {
+      const id = text.replace(/<[^>]+>/g,'').replace(/\s+/g,'_').toLowerCase();
+      headings.push({ level: parseInt(level), text: text.replace(/<[^>]+>/g,''), id });
+    });
+    // Add IDs to headings
+    t = t.replace(/<h([23])>(.+?)<\/h\1>/g, (_,level,text) => {
+      const id = text.replace(/<[^>]+>/g,'').replace(/\s+/g,'_').toLowerCase();
+      return `<h${level} id="${id}">${text}</h${level}>`;
+    });
+
+    // Tables (wikitable)
+    t = t.replace(/\{\|([\s\S]*?)\|\}/gm, (_, body) => {
+      let html = '<table class="wikitable">';
+      const rows = body.split(/\|-/);
+      rows.forEach(row => {
+        if (!row.trim()) return;
+        const cells = row.split('\n').filter(l=>l.trim());
+        let rowHtml = '';
+        cells.forEach(cell => {
+          if (cell.startsWith('!')) rowHtml += `<tr>` + cell.replace(/^!\s*/,'').split('!!').map(c=>`<th>${c.trim()}</th>`).join('') + `</tr>`;
+          else if (cell.startsWith('|')) rowHtml += `<tr>` + cell.replace(/^\|\s*/,'').split('||').map(c=>`<td>${c.trim()}</td>`).join('') + `</tr>`;
+        });
+        html += rowHtml;
+      });
+      return html + '</table>';
+    });
+
+    // Unordered lists
+    t = t.replace(/(^[*]+.+\n?)+/gm, block => {
+      const items = block.trim().split('\n');
+      return '<ul>' + items.map(i => `<li>${i.replace(/^\*+\s*/,'')}</li>`).join('') + '</ul>\n';
+    });
+
+    // Ordered lists
+    t = t.replace(/(^[#]+.+\n?)+/gm, block => {
+      const items = block.trim().split('\n');
+      return '<ol>' + items.map(i => `<li>${i.replace(/^#+\s*/,'')}</li>`).join('') + '</ol>\n';
+    });
+
+    // Definition lists
+    t = t.replace(/^;(.+?):\s*(.+)$/gm, (_,term,def)=>`<dl><dt>${term.trim()}</dt><dd>${def.trim()}</dd></dl>`);
+
+    // Bold/italic
+    t = t.replace(/'{5}(.+?)'{5}/g, '<b><i>$1</i></b>');
+    t = t.replace(/'{3}(.+?)'{3}/g, '<b>$1</b>');
+    t = t.replace(/'{2}(.+?)'{2}/g, '<i>$1</i>');
+
+    // External links [url label]
+    t = t.replace(/\[(\S+)\s+([^\]]+)\]/g, '<a href="$1" target="_blank" rel="noopener">$2</a>');
+    t = t.replace(/\[(\S+)\]/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+
+    // Wiki links [[Page|Label]] or [[Page]]
+    t = t.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (_, page, label) => {
+      const exists = existingPages.includes(page.trim());
+      return `<a href="#" class="wiki-link${exists?'':' redlink'}" onclick="WikiApp.navigate('view','${page.trim().replace(/'/g,"\\'")}');return false;">${label.trim()}</a>`;
+    });
+    t = t.replace(/\[\[([^\]]+)\]\]/g, (_, page) => {
+      const exists = existingPages.includes(page.trim());
+      return `<a href="#" class="wiki-link${exists?'':' redlink'}" onclick="WikiApp.navigate('view','${page.trim().replace(/'/g,"\\'")}');return false;">${page.trim()}</a>`;
+    });
+
+    // Categories — extract and remove from body
+    const categories = [];
+    t = t.replace(/\[\[Category:([^\]]+)\]\]/gi, (_, cat) => { categories.push(cat.trim()); return ''; });
+
+    // Images [[File:url|options]]
+    t = t.replace(/\[\[File:([^\]|]+)(?:\|([^\]]*))?\]\]/gi, (_,url,opts)=>{
+      const alt = opts || '';
+      return `<img src="${url}" alt="${alt}" style="max-width:100%">`;
+    });
+
+    // Horizontal rules
+    t = t.replace(/^----$/gm, '<hr>');
+
+    // Code blocks <code> and <pre>
+    t = t.replace(/<syntaxhighlight[^>]*>([\s\S]*?)<\/syntaxhighlight>/gi,
+      (_,code) => `<pre><code>${code.replace(/</g,'&lt;')}</code></pre>`);
+
+    // Paragraph wrapping — double newlines
+    const blocks = t.split(/\n{2,}/);
+    t = blocks.map(b => {
+      b = b.trim();
+      if (!b) return '';
+      if (/^<(h[1-6]|ul|ol|dl|table|pre|blockquote|div|hr)/.test(b)) return b;
+      return `<p>${b.replace(/\n/g,' ')}</p>`;
+    }).join('\n');
+
+    // Build TOC
+    let toc = '';
+    if (hasToc && headings.length > 2) {
+      toc = '<div class="wiki-toc"><div class="wiki-toc-title">Contents</div><ol>';
+      let inSub = false;
+      headings.forEach((h,i) => {
+        if (h.level === 2) {
+          if (inSub) { toc += '</ol></li>'; inSub = false; }
+          toc += `<li><a href="#${h.id}">${h.text}</a>`;
+        } else {
+          if (!inSub) { toc += '<ol>'; inSub = true; }
+          toc += `<li><a href="#${h.id}">${h.text}</a></li>`;
+        }
+      });
+      if (inSub) toc += '</ol></li>';
+      toc += '</ol></div>';
+    }
+
+    return { html: toc + t, categories };
+  }
+};
+
+
+/* ═══════════════════════════════════════════════════════════
+   EDITOR
+   ═══════════════════════════════════════════════════════════ */
+const Wiki = {
+  mode: 'visual',
+  savedRange: null,
+
+  exec(cmd, val=null) {
+    document.getElementById('visual-editor').focus();
+    document.execCommand(cmd, false, val);
+  },
+
+  applyHeading(tag) {
+    if (!tag) return;
+    document.getElementById('visual-editor').focus();
+    document.execCommand('formatBlock', false, tag);
+  },
+
+  setMode(m) {
+    this.mode = m;
+    const ve = document.getElementById('visual-editor');
+    const se = document.getElementById('source-editor');
+    const mv = document.getElementById('mode-visual');
+    const ms = document.getElementById('mode-source');
+    if (m === 'visual') {
+      // Convert wikitext → HTML for visual editor
+      const wt = se.value;
+      const { html } = Parser.parse(wt);
+      ve.innerHTML = html;
+      ve.style.display = '';
+      se.classList.remove('visible');
+      mv.classList.add('active');
+      ms.classList.remove('active');
+    } else {
+      // Convert visual HTML → wikitext
+      se.value = this.htmlToWikitext(ve.innerHTML);
+      ve.style.display = 'none';
+      se.classList.add('visible');
+      mv.classList.remove('active');
+      ms.classList.add('active');
+    }
+  },
+
+  htmlToWikitext(html) {
+    let t = html;
+    t = t.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '== $1 ==');
+    t = t.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '=== $1 ===');
+    t = t.replace(/<h4[^>]*>(.*?)<\/h4>/gi, '==== $1 ====');
+    t = t.replace(/<b><i>(.*?)<\/i><\/b>/gi, "'''''$1'''''");
+    t = t.replace(/<strong>(.*?)<\/strong>/gi, "'''$1'''");
+    t = t.replace(/<b>(.*?)<\/b>/gi, "'''$1'''");
+    t = t.replace(/<em>(.*?)<\/em>/gi, "''$1''");
+    t = t.replace(/<i>(.*?)<\/i>/gi, "''$1''");
+    t = t.replace(/<u>(.*?)<\/u>/gi, '<u>$1</u>');
+    t = t.replace(/<s>(.*?)<\/s>/gi, '<s>$1</s>');
+    t = t.replace(/<a[^>]*class="wiki-link"[^>]*onclick="[^"]*navigate\('view','([^']+)'\)[^"]*"[^>]*>(.*?)<\/a>/gi,
+      (_, page, label) => page === label ? `[[${page}]]` : `[[${page}|${label}]]`);
+    t = t.replace(/<a[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/gi, '[$1 $2]');
+    t = t.replace(/<ul>([\s\S]*?)<\/ul>/gi, (_, inner) =>
+      inner.replace(/<li>(.*?)<\/li>/gi, '* $1').replace(/<[^>]+>/g,''));
+    t = t.replace(/<ol>([\s\S]*?)<\/ol>/gi, (_, inner) =>
+      inner.replace(/<li>(.*?)<\/li>/gi, '# $1').replace(/<[^>]+>/g,''));
+    t = t.replace(/<blockquote>([\s\S]*?)<\/blockquote>/gi, '<blockquote>$1</blockquote>');
+    t = t.replace(/<p>([\s\S]*?)<\/p>/gi, '$1\n\n');
+    t = t.replace(/<br\s*\/?>/gi, '\n');
+    t = t.replace(/<[^>]+>/g, '');
+    t = t.replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+    return t.trim();
+  },
+
+  getWikitext() {
+    if (this.mode === 'source') return document.getElementById('source-editor').value;
+    return this.htmlToWikitext(document.getElementById('visual-editor').innerHTML);
+  },
+
+  setContent(wikitext) {
+    document.getElementById('source-editor').value = wikitext;
+    const { html } = Parser.parse(wikitext, WikiApp.allPageNames());
+    document.getElementById('visual-editor').innerHTML = html;
+  },
+
+  showLinkDialog()     { this.saveRange(); document.getElementById('link-dialog').classList.add('visible'); document.getElementById('link-url').focus(); },
+  closeLinkDialog()    { document.getElementById('link-dialog').classList.remove('visible'); },
+  showWikiLinkDialog() { this.saveRange(); document.getElementById('wiki-link-dialog').classList.add('visible'); document.getElementById('wl-page').focus(); },
+  closeWikiLinkDialog(){ document.getElementById('wiki-link-dialog').classList.remove('visible'); },
+  showImageDialog()    { this.saveRange(); document.getElementById('image-dialog').classList.add('visible'); document.getElementById('img-url').focus(); },
+  closeImageDialog()   { document.getElementById('image-dialog').classList.remove('visible'); },
+
+  saveRange() {
+    const sel = window.getSelection();
+    if (sel.rangeCount) this.savedRange = sel.getRangeAt(0);
+  },
+  restoreRange() {
+    if (!this.savedRange) return;
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(this.savedRange);
+  },
+
+  insertLink() {
+    const url = document.getElementById('link-url').value.trim();
+    const label = document.getElementById('link-label').value.trim() || url;
+    if (!url) return;
+    this.restoreRange();
+    document.getElementById('visual-editor').focus();
+    document.execCommand('insertHTML', false, `<a href="${url}" target="_blank" rel="noopener">${label}</a>`);
+    this.closeLinkDialog();
+    document.getElementById('link-url').value = '';
+    document.getElementById('link-label').value = '';
+  },
+
+  insertWikiLink() {
+    const page = document.getElementById('wl-page').value.trim();
+    const label = document.getElementById('wl-label').value.trim() || page;
+    if (!page) return;
+    const exists = WikiApp.allPageNames().includes(page);
+    this.restoreRange();
+    document.getElementById('visual-editor').focus();
+    document.execCommand('insertHTML', false,
+      `<a href="#" class="wiki-link${exists?'':' redlink'}" onclick="WikiApp.navigate('view','${page.replace(/'/g,"\\'")}');return false;">${label}</a>`);
+    this.closeWikiLinkDialog();
+    document.getElementById('wl-page').value = '';
+    document.getElementById('wl-label').value = '';
+  },
+
+  insertImage() {
+    const url = document.getElementById('img-url').value.trim();
+    const alt = document.getElementById('img-alt').value.trim();
+    if (!url) return;
+    this.restoreRange();
+    document.getElementById('visual-editor').focus();
+    document.execCommand('insertHTML', false, `<img src="${url}" alt="${alt}" style="max-width:100%"><br>`);
+    this.closeImageDialog();
+    document.getElementById('img-url').value = '';
+    document.getElementById('img-alt').value = '';
+  },
+
+  insertTable() {
+    const html = `<table style="border-collapse:collapse;width:100%">
+      <tr><th style="border:1px solid var(--border);padding:6px">Header 1</th><th style="border:1px solid var(--border);padding:6px">Header 2</th></tr>
+      <tr><td style="border:1px solid var(--border);padding:6px">Cell</td><td style="border:1px solid var(--border);padding:6px">Cell</td></tr>
+    </table><p><br></p>`;
+    document.getElementById('visual-editor').focus();
+    document.execCommand('insertHTML', false, html);
+  },
+
+  insertCode() {
+    document.getElementById('visual-editor').focus();
+    document.execCommand('insertHTML', false, '<pre><code>// code here</code></pre><p><br></p>');
+  },
+
+  insertInfobox() {
+    document.getElementById('visual-editor').focus();
+    document.execCommand('insertHTML', false,
+      `<div class="wiki-infobox"><div class="wiki-infobox-title">Infobox Title</div>
+      <table><tr><th>Key</th><td>Value</td></tr></table></div><p><br></p>`);
+  },
+
+  cancelEdit() {
+    WikiApp.navigate('view', WikiApp.currentPage);
+  },
+
+  async save() {
+    if (!Auth.canEdit) { WikiApp.showToast('You must be signed in to save', 'error'); return; }
+    if (!GH.repo) { WikiApp.showToast('Configure GitHub repo in Settings first', 'error'); WikiApp.toggleSettings(); return; }
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Saving…';
+
+    const wikitext = this.getWikitext();
+    const summary = document.getElementById('editor-summary').value.trim() || 'Edit page';
+    const wiki = WikiApp.currentWiki;
+    const page = WikiApp.currentPage;
+    const filePath = `${wiki}/${page.replace(/\s+/g,'_')}.wiki`;
+    const commitMsg = `[${wiki}] ${summary} — ${page} (via WikiForge)`;
+
+    try {
+      // Get current SHA if exists
+      const existing = await GH.getFile(filePath);
+      await GH.putFile(filePath, wikitext, commitMsg, existing?.sha || null);
+
+      // Update page index
+      await WikiApp.updatePageIndex(wiki, page, wikitext);
+
+      WikiApp.showToast('Page saved ✓', 'success');
+      btn.disabled = false;
+      btn.textContent = '💾 Save page';
+      WikiApp.navigate('view', page);
+    } catch(e) {
+      WikiApp.showToast('Save failed: ' + e.message, 'error');
+      btn.disabled = false;
+      btn.textContent = '💾 Save page';
+    }
+  }
+};
+
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN APP
+   ═══════════════════════════════════════════════════════════ */
+const WikiApp = {
+  currentWiki: WIKI_CONFIG.defaultWiki,
+  currentPage: null,
+  pageCache: {},   // wiki → {pageName: {wikitext, meta}}
+  indexCache: {},  // wiki → index JSON
+
+  // ── INIT ──────────────────────────────────────────────────
+  async init() {
+    this.renderUserArea();
+    this.loadSettings();
+    this.loadWikiSelector();
+    this.navigate('home');
+    this.initSearch();
+
+    // Hash-based routing
+    window.addEventListener('hashchange', () => this.routeFromHash());
+    this.routeFromHash();
+  },
+
+  routeFromHash() {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    const [view, wiki, ...rest] = hash.split('/');
+    if (wiki) this.currentWiki = wiki;
+    if (view === 'page' && rest.length) this.navigate('view', decodeURIComponent(rest.join('/')));
+    else if (view === 'edit' && rest.length) this.navigate('edit', decodeURIComponent(rest.join('/')));
+    else if (view === 'home') this.navigate('home');
+  },
+
+  setHash(view, wiki, page='') {
+    const p = page ? `/${encodeURIComponent(page)}` : '';
+    window.location.hash = `${view}/${wiki}${p}`;
+  },
+
+  // ── WIKI SELECTOR ─────────────────────────────────────────
+  loadWikiSelector() {
+    const wikis = this.getWikiList();
+    const sel = document.getElementById('wiki-select');
+    sel.innerHTML = wikis.map(w =>
+      `<option value="${w.id}" ${w.id===this.currentWiki?'selected':''}>${w.name}</option>`
+    ).join('');
+  },
+
+  getWikiList() {
+    const stored = localStorage.getItem('wf_wikis');
+    if (stored) return JSON.parse(stored);
+    return WIKI_CONFIG.wikis;
+  },
+
+  switchWiki(id) {
+    this.currentWiki = id;
+    this.updateWikiTitleDisplay();
+    this.loadSidebar();
+    this.navigate('home');
+  },
+
+  updateWikiTitleDisplay() {
+    const wikis = this.getWikiList();
+    const w = wikis.find(x=>x.id===this.currentWiki);
+    document.getElementById('wiki-title-display').textContent = w?.name || this.currentWiki;
+  },
+
+  // ── NAVIGATE ──────────────────────────────────────────────
+  navigate(view, page=null) {
+    // Hide all views
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('page-view').style.display = 'none';
+    document.getElementById('history-view').style.display = 'none';
+    document.getElementById('loading-view').style.display = 'none';
+    document.getElementById('editor-wrap').classList.remove('visible');
+    document.getElementById('page-content').style.display = '';
+
+    if (view === 'home') {
+      this.currentPage = null;
+      this.showHome();
+    } else if (view === 'view' && page) {
+      this.currentPage = page;
+      this.setHash('page', this.currentWiki, page);
+      this.showPage(page);
+    } else if (view === 'edit' && page) {
+      this.currentPage = page;
+      this.setHash('edit', this.currentWiki, page);
+      this.showEditor(page);
+    } else if (view === 'history' && page) {
+      this.currentPage = page;
+      this.showHistory(page);
+    }
+  },
+
+  // ── HOME ──────────────────────────────────────────────────
+  async showHome() {
+    const div = document.getElementById('home-view');
+    div.style.display = '';
+    this.updateWikiTitleDisplay();
+
+    const wikis = this.getWikiList();
+    const w = wikis.find(x=>x.id===this.currentWiki) || wikis[0];
+    const pages = await this.getPageIndex();
+    const recent = Object.entries(pages).sort((a,b)=>(b[1].updated||0)-(a[1].updated||0)).slice(0,8);
+    const all = Object.keys(pages).slice(0,12);
+
+    div.innerHTML = `
+      <div class="home-hero">
+        <h1>${w?.name || 'WikiForge'}</h1>
+        <p>${w?.description || 'Welcome to your wiki.'} &nbsp; <strong>${Object.keys(pages).length}</strong> pages.</p>
+        ${Auth.canEdit ? `<button class="hbtn primary" style="margin-top:12px" onclick="WikiApp.showNewPageModal()">+ New page</button>` : ''}
+      </div>
+      <div class="home-grid">
+        <div class="home-card">
+          <h3>Recent changes</h3>
+          ${recent.length ? recent.map(([name,meta])=>`
+            <div class="home-card-item" onclick="WikiApp.navigate('view','${name}')">
+              📄 ${name}
+              <span class="hci-meta">${meta.updated ? new Date(meta.updated).toLocaleDateString() : ''}</span>
+            </div>`).join('') : '<p style="color:var(--text3);font-size:13px">No pages yet.</p>'}
+        </div>
+        <div class="home-card">
+          <h3>All pages</h3>
+          ${all.length ? all.map(name=>`
+            <div class="home-card-item" onclick="WikiApp.navigate('view','${name}')">
+              📄 ${name}
+            </div>`).join('') : '<p style="color:var(--text3);font-size:13px">No pages yet. Create the first one!</p>'}
+          ${Object.keys(pages).length > 12 ? `<div style="padding:6px 0;font-size:12px;color:var(--text3)">(${Object.keys(pages).length-12} more…)</div>` : ''}
+        </div>
+      </div>`;
+
+    this.loadSidebar();
+  },
+
+  // ── PAGE VIEW ─────────────────────────────────────────────
+  async showPage(pageName) {
+    if (!GH.repo) {
+      document.getElementById('page-view').style.display = '';
+      document.getElementById('page-view').innerHTML = `
+        <div style="padding:40px;text-align:center;color:var(--text2)">
+          <p style="font-size:24px;margin-bottom:12px">⚙️</p>
+          <p>Configure your GitHub repository in <strong>Settings</strong> to start reading and editing pages.</p>
+          <button class="hbtn primary" style="margin-top:16px" onclick="WikiApp.toggleSettings()">Open Settings</button>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('loading-view').style.display = '';
+    try {
+      const { wikitext, meta } = await this.loadPage(pageName);
+      const allPages = this.allPageNames();
+      const { html, categories } = Parser.parse(wikitext, allPages);
+
+      document.getElementById('loading-view').style.display = 'none';
+      const pv = document.getElementById('page-view');
+      pv.style.display = '';
+
+      const catHtml = categories.length
+        ? `<div class="wiki-categories">
+            <span>Categories:</span>
+            ${categories.map(c=>`<a class="wiki-cat-link" href="#" onclick="WikiApp.filterByCategory('${c}');return false;">${c}</a>`).join('')}
+           </div>` : '';
+
+      pv.innerHTML = `
+        <div class="page-header">
+          <h1>${pageName}</h1>
+          <div class="page-meta">
+            <span>📂 ${this.currentWiki}</span>
+            ${meta?.updated ? `<span>✏️ ${new Date(meta.updated).toLocaleDateString()}</span>` : ''}
+            ${meta?.author ? `<span>👤 ${meta.author}</span>` : ''}
+            <div class="page-actions">
+              <button onclick="WikiApp.navigate('history','${pageName}')">📋 History</button>
+              ${Auth.canEdit ? `<button class="edit-btn" onclick="WikiApp.navigate('edit','${pageName}')">✏️ Edit</button>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="wiki-content">${html}</div>
+        ${catHtml}`;
+    } catch(e) {
+      document.getElementById('loading-view').style.display = 'none';
+      const pv = document.getElementById('page-view');
+      pv.style.display = '';
+      if (e.message.includes('404') || e.message.includes('not found')) {
+        pv.innerHTML = `
+          <div class="page-header"><h1>${pageName}</h1></div>
+          <div style="color:var(--text2);padding:20px 0">
+            <p>This page doesn't exist yet.</p>
+            ${Auth.canEdit ? `<button class="hbtn primary" style="margin-top:12px" onclick="WikiApp.navigate('edit','${pageName}')">✏️ Create this page</button>` : ''}
+          </div>`;
+      } else {
+        pv.innerHTML = `<div style="color:var(--danger);padding:20px">Error loading page: ${e.message}</div>`;
+      }
+    }
+  },
+
+  // ── EDITOR ────────────────────────────────────────────────
+  async showEditor(pageName) {
+    if (!Auth.canEdit) { this.showLoginModal(); return; }
+    document.getElementById('page-content').style.display = 'none';
+    const ew = document.getElementById('editor-wrap');
+    ew.classList.add('visible');
+
+    // Load existing content
+    let wikitext = '';
+    try {
+      const result = await this.loadPage(pageName);
+      wikitext = result.wikitext;
+    } catch(e) {
+      // New page
+      wikitext = `= ${pageName} =\n\n<!-- Start writing here. Use == Heading == for sections. -->\n\n`;
+    }
+
+    Wiki.setContent(wikitext);
+    Wiki.setMode('visual');
+    document.getElementById('editor-summary').value = '';
+    document.getElementById('visual-editor').focus();
+  },
+
+  // ── HISTORY ───────────────────────────────────────────────
+  async showHistory(pageName) {
+    document.getElementById('loading-view').style.display = '';
+    try {
+      const filePath = `${this.currentWiki}/${pageName.replace(/\s+/g,'_')}.wiki`;
+      const commits = await GH.getHistory(filePath);
+      document.getElementById('loading-view').style.display = 'none';
+      const hv = document.getElementById('history-view');
+      hv.style.display = '';
+      hv.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+          <a href="#" onclick="WikiApp.navigate('view','${pageName}');return false;" style="color:var(--text3);font-size:13px">← Back to page</a>
+          <h2 style="font-size:22px;font-family:var(--font-body)">History: ${pageName}</h2>
+        </div>
+        ${commits.length ? commits.map(c => `
+          <div class="history-item">
+            <span class="hi-sha">${c.sha.slice(0,7)}</span>
+            <span class="hi-msg">${c.commit.message}</span>
+            <span class="hi-author">${c.commit.author.name}</span>
+            <span class="hi-date">${new Date(c.commit.author.date).toLocaleString()}</span>
+            <button class="restore-btn" onclick="WikiApp.restoreRevision('${pageName}','${c.sha}')">Restore</button>
+          </div>`).join('') : '<p style="color:var(--text3)">No history found. Make sure your PAT has repo read access.</p>'}`;
+    } catch(e) {
+      document.getElementById('loading-view').style.display = 'none';
+      document.getElementById('history-view').style.display = '';
+      document.getElementById('history-view').innerHTML = `<p style="color:var(--danger)">Error: ${e.message}</p>`;
+    }
+  },
+
+  async restoreRevision(pageName, sha) {
+    try {
+      const filePath = `${this.currentWiki}/${pageName.replace(/\s+/g,'_')}.wiki`;
+      const url = `https://api.github.com/repos/${GH.repo}/contents/${GH.path}/${filePath}?ref=${sha}`;
+      const r = await fetch(url, { headers: GH.headers() });
+      const data = await r.json();
+      const wikitext = atob(data.content.replace(/\n/g,''));
+      const existing = await GH.getFile(filePath);
+      await GH.putFile(filePath, wikitext, `Restore to ${sha.slice(0,7)} — ${pageName}`, existing?.sha);
+      this.pageCache = {};
+      this.showToast('Revision restored ✓', 'success');
+      this.navigate('view', pageName);
+    } catch(e) {
+      this.showToast('Restore failed: ' + e.message, 'error');
+    }
+  },
+
+  // ── PAGE DATA ─────────────────────────────────────────────
+  async loadPage(pageName) {
+    const cacheKey = `${this.currentWiki}/${pageName}`;
+    if (this.pageCache[cacheKey]) return this.pageCache[cacheKey];
+
+    const filePath = `${this.currentWiki}/${pageName.replace(/\s+/g,'_')}.wiki`;
+    const file = await GH.getFile(filePath);
+    if (!file) throw new Error('Page not found (404)');
+
+    const index = await this.getPageIndex();
+    const meta = index[pageName] || {};
+    const result = { wikitext: file.content, meta };
+    this.pageCache[cacheKey] = result;
+    return result;
+  },
+
+  async getPageIndex() {
+    if (this.indexCache[this.currentWiki]) return this.indexCache[this.currentWiki];
+    try {
+      const file = await GH.getFile(`${this.currentWiki}/_index.json`);
+      if (file) {
+        this.indexCache[this.currentWiki] = JSON.parse(file.content);
+        return this.indexCache[this.currentWiki];
+      }
+    } catch(e) {}
+    this.indexCache[this.currentWiki] = {};
+    return this.indexCache[this.currentWiki];
+  },
+
+  async updatePageIndex(wiki, pageName, wikitext) {
+    const indexFile = `${wiki}/_index.json`;
+    let index = {};
+    let sha = null;
+    try {
+      const existing = await GH.getFile(indexFile);
+      if (existing) { index = JSON.parse(existing.content); sha = existing.sha; }
+    } catch(e) {}
+
+    // Extract categories & excerpt
+    const lines = wikitext.split('\n');
+    const cats = [];
+    wikitext.replace(/\[\[Category:([^\]]+)\]\]/gi, (_,c) => cats.push(c.trim()));
+    const excerpt = wikitext.replace(/[=\[\]{|}]/g,'').replace(/\s+/g,' ').trim().slice(0,160);
+
+    index[pageName] = {
+      updated: Date.now(),
+      author: Auth.current?.displayName || 'Anonymous',
+      categories: cats,
+      excerpt
+    };
+    this.indexCache[wiki] = index;
+    this.pageCache[`${wiki}/${pageName}`] = null; // bust cache
+
+    await GH.putFile(indexFile, JSON.stringify(index, null, 2), `Update index: ${pageName}`, sha);
+  },
+
+  allPageNames() {
+    const index = this.indexCache[this.currentWiki] || {};
+    return Object.keys(index);
+  },
+
+  // ── SIDEBAR ───────────────────────────────────────────────
+  async loadSidebar() {
+    const index = await this.getPageIndex();
+    const pages = Object.keys(index);
+    const nav = document.getElementById('sidebar-nav');
+
+    nav.innerHTML = `
+      <a class="sidebar-item" href="#" onclick="WikiApp.navigate('home');return false;">🏠 Home</a>
+      ${Auth.canEdit ? `<a class="sidebar-item" href="#" onclick="WikiApp.showNewPageModal();return false;">+ New page</a>` : ''}
+      ${pages.map(p => `
+        <a class="sidebar-item ${p===this.currentPage?'active':''}" href="#"
+           onclick="WikiApp.navigate('view','${p.replace(/'/g,"\\'")}');return false;">
+          📄 ${p}
+        </a>`).join('')}`;
+
+    // Categories
+    const cats = {};
+    Object.values(index).forEach(meta => {
+      (meta.categories||[]).forEach(c => { cats[c] = (cats[c]||0)+1; });
+    });
+    const catSection = document.getElementById('categories-section');
+    if (Object.keys(cats).length) {
+      catSection.style.display = '';
+      document.getElementById('sidebar-cats').innerHTML = Object.keys(cats).map(c =>
+        `<a class="sidebar-item" href="#" onclick="WikiApp.filterByCategory('${c}');return false;">🏷 ${c} <span class="si-wiki">${cats[c]}</span></a>`
+      ).join('');
+    } else {
+      catSection.style.display = 'none';
+    }
+  },
+
+  filterByCategory(cat) {
+    const index = this.indexCache[this.currentWiki] || {};
+    const pages = Object.entries(index).filter(([,m])=>(m.categories||[]).includes(cat));
+    const pv = document.getElementById('page-view');
+    document.getElementById('home-view').style.display = 'none';
+    pv.style.display = '';
+    pv.innerHTML = `
+      <div class="page-header">
+        <h1>Category: ${cat}</h1>
+        <div class="page-meta"><span>${pages.length} pages</span></div>
+      </div>
+      <div class="wiki-content">
+        <ul>${pages.map(([name])=>`<li><a href="#" class="wiki-link" onclick="WikiApp.navigate('view','${name}');return false;">${name}</a></li>`).join('')}</ul>
+      </div>`;
+  },
+
+  // ── NEW PAGE ──────────────────────────────────────────────
+  showNewPageModal() {
+    if (!Auth.canEdit) { this.showLoginModal(); return; }
+    const sel = document.getElementById('np-wiki');
+    sel.innerHTML = this.getWikiList().map(w=>`<option value="${w.id}" ${w.id===this.currentWiki?'selected':''}>${w.name}</option>`).join('');
+    document.getElementById('np-title').value = '';
+    document.getElementById('np-category').value = '';
+    document.getElementById('np-error').textContent = '';
+    document.getElementById('new-page-modal').classList.add('visible');
+    document.getElementById('np-title').focus();
+  },
+
+  async createPage() {
+    const title = document.getElementById('np-title').value.trim();
+    const wiki = document.getElementById('np-wiki').value;
+    const cat = document.getElementById('np-category').value.trim();
+    if (!title) { document.getElementById('np-error').textContent = 'Please enter a title.'; return; }
+    if (!GH.repo) { document.getElementById('np-error').textContent = 'Configure GitHub repo in Settings first.'; return; }
+
+    this.closeModal('new-page-modal');
+    this.currentWiki = wiki;
+    document.getElementById('wiki-select').value = wiki;
+    this.navigate('edit', title);
+
+    // Pre-fill category
+    if (cat) {
+      setTimeout(() => {
+        const src = document.getElementById('source-editor');
+        const cat_tag = `\n\n[[Category:${cat}]]`;
+        if (!src.value.includes(cat_tag)) {
+          Wiki.setContent(src.value + cat_tag);
+        }
+      }, 300);
+    }
+  },
+
+  // ── CREATE WIKI ───────────────────────────────────────────
+  showNewWikiModal() {
+    document.getElementById('nw-id').value = '';
+    document.getElementById('nw-name').value = '';
+    document.getElementById('nw-desc').value = '';
+    document.getElementById('nw-error').textContent = '';
+    document.getElementById('new-wiki-modal').classList.add('visible');
+    document.getElementById('nw-id').focus();
+  },
+
+  async createWiki() {
+    const id = document.getElementById('nw-id').value.trim().toLowerCase().replace(/\s+/g,'-');
+    const name = document.getElementById('nw-name').value.trim();
+    const desc = document.getElementById('nw-desc').value.trim();
+    if (!id || !name) { document.getElementById('nw-error').textContent = 'ID and name are required.'; return; }
+
+    const wikis = this.getWikiList();
+    if (wikis.find(w=>w.id===id)) { document.getElementById('nw-error').textContent = 'A wiki with that ID already exists.'; return; }
+
+    wikis.push({ id, name, description: desc });
+    localStorage.setItem('wf_wikis', JSON.stringify(wikis));
+
+    // Create placeholder on GitHub
+    if (GH.repo) {
+      try {
+        await GH.putFile(`${id}/_index.json`, '{}', `Create wiki: ${name}`);
+        await GH.putFile(`${id}/Main_Page.wiki`,
+          `= Welcome to ${name} =\n\n${desc}\n\n__TOC__\n\n== Getting started ==\n\nEdit this page to get started!\n`,
+          `Initialize wiki: ${name}`);
+      } catch(e) { document.getElementById('nw-error').textContent = 'GitHub error: ' + e.message; return; }
+    }
+
+    this.closeModal('new-wiki-modal');
+    this.loadWikiSelector();
+    this.switchWiki(id);
+    this.showToast(`Wiki "${name}" created ✓`, 'success');
+  },
+
+  // ── DELETE PAGE ───────────────────────────────────────────
+  deletePage() {
+    if (!this.currentPage) return;
+    document.getElementById('delete-page-name').textContent = this.currentPage;
+    document.getElementById('delete-modal').classList.add('visible');
+  },
+
+  async confirmDelete() {
+    const page = this.currentPage;
+    const filePath = `${this.currentWiki}/${page.replace(/\s+/g,'_')}.wiki`;
+    this.closeModal('delete-modal');
+    try {
+      const file = await GH.getFile(filePath);
+      if (!file) { this.showToast('Page not found', 'error'); return; }
+      await GH.deleteFile(filePath, `Delete: ${page}`, file.sha);
+
+      // Update index
+      const index = await this.getPageIndex();
+      delete index[page];
+      const idxFile = await GH.getFile(`${this.currentWiki}/_index.json`);
+      await GH.putFile(`${this.currentWiki}/_index.json`, JSON.stringify(index,null,2), `Remove from index: ${page}`, idxFile?.sha);
+
+      this.indexCache[this.currentWiki] = index;
+      this.showToast('Page deleted', 'success');
+      this.navigate('home');
+    } catch(e) {
+      this.showToast('Delete failed: ' + e.message, 'error');
+    }
+  },
+
+  // ── SEARCH ────────────────────────────────────────────────
+  initSearch() {
+    const input = document.getElementById('search-input');
+    const results = document.getElementById('search-results');
+    let debounce;
+
+    input.addEventListener('input', () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => this.doSearch(input.value), 200);
+    });
+
+    input.addEventListener('focus', () => {
+      if (results.children.length) results.style.display = '';
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#search-wrap')) results.style.display = 'none';
+    });
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { results.style.display = 'none'; input.blur(); }
+    });
+  },
+
+  async doSearch(query) {
+    const q = query.trim().toLowerCase();
+    const results = document.getElementById('search-results');
+    if (!q) { results.style.display = 'none'; return; }
+
+    const index = await this.getPageIndex();
+    const matches = Object.entries(index).filter(([name, meta]) =>
+      name.toLowerCase().includes(q) ||
+      (meta.excerpt||'').toLowerCase().includes(q) ||
+      (meta.categories||[]).some(c=>c.toLowerCase().includes(q))
+    ).slice(0,8);
+
+    if (!matches.length) {
+      results.innerHTML = `<div class="search-result-item" style="color:var(--text3)">No results for "${query}"</div>`;
+    } else {
+      results.innerHTML = matches.map(([name, meta]) => `
+        <div class="search-result-item" onclick="WikiApp.navigate('view','${name}');document.getElementById('search-results').style.display='none';document.getElementById('search-input').value=''">
+          <div>📄 <strong>${name}</strong></div>
+          <div style="color:var(--text3);font-size:11px;margin-top:2px">${(meta.excerpt||'').slice(0,80)}…</div>
+          <div class="sr-wiki">${this.currentWiki}</div>
+        </div>`).join('');
+    }
+    results.style.display = '';
+  },
+
+  // ── AUTH ──────────────────────────────────────────────────
+  renderUserArea() {
+    const area = document.getElementById('user-area');
+    const adminSettings = document.getElementById('admin-settings');
+    const patRow = document.getElementById('pat-row');
+    if (Auth.isLoggedIn) {
+      area.innerHTML = `
+        <div id="user-badge" title="${Auth.current.role}" onclick="WikiApp.toggleSettings()">
+          👤 ${Auth.current.displayName}
+          <span style="font-size:10px;opacity:.7">${Auth.current.role}</span>
+        </div>`;
+      document.getElementById('settings-user-info').textContent =
+        `Signed in as ${Auth.current.displayName} (${Auth.current.role})`;
+      if (Auth.isAdmin) { adminSettings.style.display = ''; patRow.style.display = ''; }
+      else if (Auth.canEdit) { adminSettings.style.display = ''; patRow.style.display = ''; }
+    } else {
+      area.innerHTML = `<button class="hbtn" onclick="WikiApp.showLoginModal()">Sign in</button>`;
+      document.getElementById('settings-user-info').textContent = 'Not signed in';
+      adminSettings.style.display = 'none';
+    }
+  },
+
+  showLoginModal() {
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('login-modal').classList.add('visible');
+    document.getElementById('login-user').focus();
+  },
+
+  closeLoginModal() { document.getElementById('login-modal').classList.remove('visible'); },
+
+  async doLogin() {
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    const ok = await Auth.login(u, p);
+    if (ok) {
+      this.closeLoginModal();
+      this.renderUserArea();
+      this.showToast(`Welcome, ${Auth.current.displayName}!`, 'success');
+      this.loadSidebar();
+    } else {
+      document.getElementById('login-error').textContent = 'Invalid username or password.';
+    }
+  },
+
+  logout() {
+    Auth.logout();
+    this.renderUserArea();
+    this.toggleSettings();
+    this.showToast('Signed out', 'success');
+    this.navigate('home');
+  },
+
+  // ── GITHUB SETTINGS ───────────────────────────────────────
+  saveGithubConfig() {
+    const repo = document.getElementById('cfg-repo').value.trim();
+    const branch = document.getElementById('cfg-branch').value.trim() || 'main';
+    const path = document.getElementById('cfg-path').value.trim() || 'wiki-data';
+    const pat = document.getElementById('cfg-pat').value.trim();
+
+    if (!repo) { document.getElementById('gh-error').textContent = 'Repository is required.'; return; }
+    localStorage.setItem('wf_repo', repo);
+    localStorage.setItem('wf_branch', branch);
+    localStorage.setItem('wf_path', path);
+    if (pat) localStorage.setItem('wf_pat', pat);
+
+    this.updateGHStatus();
+    this.showToast('GitHub config saved', 'success');
+    this.pageCache = {};
+    this.indexCache = {};
+    this.navigate('home');
+  },
+
+  async testGithubConnection() {
+    document.getElementById('gh-error').textContent = 'Testing…';
+    try {
+      const r = await fetch(`https://api.github.com/repos/${GH.repo}`, { headers: GH.headers() });
+      if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+      const data = await r.json();
+      document.getElementById('gh-error').textContent = '';
+      this.showToast(`✓ Connected to ${data.full_name}`, 'success');
+      this.updateGHStatus(true);
+    } catch(e) {
+      document.getElementById('gh-error').textContent = 'Connection failed: ' + e.message;
+    }
+  },
+
+  updateGHStatus(ok=null) {
+    const dot = document.getElementById('gh-dot');
+    const txt = document.getElementById('gh-status-text');
+    if (ok === true) { dot.className = 'gh-dot ok'; txt.textContent = `Connected: ${GH.repo}`; }
+    else if (!GH.repo) { dot.className = 'gh-dot'; txt.textContent = 'Not configured'; }
+    else { dot.className = 'gh-dot'; txt.textContent = `Configured: ${GH.repo} (untested)`; }
+  },
+
+  loadSettings() {
+    document.getElementById('cfg-repo').value = GH.repo;
+    document.getElementById('cfg-branch').value = GH.branch;
+    document.getElementById('cfg-path').value = GH.path;
+    document.getElementById('cfg-pat').value = GH.pat ? '••••••••' : '';
+    this.updateGHStatus();
+
+    const theme = localStorage.getItem('wf_theme') || '';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('.theme-preset-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.theme === theme);
+    });
+
+    const css = localStorage.getItem('wf_custom_css') || '';
+    document.getElementById('custom-css').value = css;
+    if (css) this.applyCustomCSS();
+  },
+
+  // ── THEME ─────────────────────────────────────────────────
+  setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('wf_theme', theme);
+    document.querySelectorAll('.theme-preset-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.theme === theme);
+    });
+  },
+
+  applyCustomCSS() {
+    const css = document.getElementById('custom-css').value;
+    localStorage.setItem('wf_custom_css', css);
+    let style = document.getElementById('custom-style-el');
+    if (!style) { style = document.createElement('style'); style.id = 'custom-style-el'; document.head.appendChild(style); }
+    style.textContent = css;
+    this.showToast('CSS applied ✓', 'success');
+  },
+
+  // ── SETTINGS PANEL ────────────────────────────────────────
+  toggleSettings() {
+    const panel = document.getElementById('settings-panel');
+    panel.classList.toggle('visible');
+  },
+
+  // ── UTILITIES ─────────────────────────────────────────────
+  showToast(msg, type='') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `show${type?' '+type:''}`;
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => { t.className = ''; }, 3000);
+  },
+
+  closeModal(id) { document.getElementById(id).classList.remove('visible'); },
+
+  showManageAccountsModal() {
+    this.showToast('Edit the WIKI_CONFIG.accounts array in wiki.html to manage accounts.', '');
+  },
+
+  showWikiSettingsModal() {
+    const wikis = this.getWikiList();
+    const w = wikis.find(x=>x.id===this.currentWiki);
+    if (w) alert(`Wiki: ${w.name}\nID: ${w.id}\nDescription: ${w.description||'none'}`);
+  }
+};
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='s' && document.getElementById('editor-wrap').classList.contains('visible')) {
+    e.preventDefault(); Wiki.save();
+  }
+  if (e.key==='Escape') {
+    document.querySelectorAll('.modal-overlay.visible').forEach(m=>m.classList.remove('visible'));
+    document.querySelectorAll('.inline-dialog.visible').forEach(d=>d.classList.remove('visible'));
+  }
+  if ((e.ctrlKey||e.metaKey) && e.key==='k') {
+    e.preventDefault(); document.getElementById('search-input').focus();
+  }
+});
+
+// Enter key in modals
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') WikiApp.doLogin(); });
+document.getElementById('np-title').addEventListener('keydown', e => { if(e.key==='Enter') WikiApp.createPage(); });
+
+// ── BOOT ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => WikiApp.init());
+</script>
+</body>
+</html>
