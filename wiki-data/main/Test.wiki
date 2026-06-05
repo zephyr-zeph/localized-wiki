@@ -1,1 +1,12 @@
-Test
+Epic game!
+
+{{Infobox
+| name = Alice
+| image = https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg
+| age = 24
+| role = Protagonist
+| species = Human
+| affiliation = The Order
+| first appearance = Chapter 1
+| status = Alive
+}}
