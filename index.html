@@ -1262,7 +1262,8 @@ const Parser = {
         if (!m) { if (line.includes('|')) title = line.replace(/\|/g,'').trim(); return; }
         const [,k,v] = m;
         if (k.toLowerCase()==='name') title = v;
-        else rows += `<tr><th>${k}</th><td>${v}</td></tr>`;
+         else if (k.toLowerCase()==='image') rows = `<tr><td colspan="2" style="text-align:center;padding:8px"><img src="${v.trim()}" style="max-width:100%;border-radius:4px"></td></tr>` + rows;
+         else rows += `<tr><th>${k}</th><td>${v}</td></tr>`;
       });
       return `<div class="wiki-infobox"><div class="wiki-infobox-title">${title}</div><table>${rows}</table></div>`;
     });
