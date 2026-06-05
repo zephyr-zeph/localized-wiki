@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WikiForge</title>
+<title>BR.Wiki</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -836,7 +836,7 @@ select option { background: var(--bg2); }
         </div>
       </div>
       <div style="padding: 10px 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text3);">
-        WikiForge v1.0
+        BR.Wiki v1.0
       </div>
     </div>
 
@@ -1006,7 +1006,7 @@ select option { background: var(--bg2); }
 <!-- Login -->
 <div class="modal-overlay" id="login-modal">
   <div class="modal">
-    <h2>🔐 Sign in to WikiForge</h2>
+    <h2>🔐 Sign in to BR.Wiki</h2>
     <div class="modal-field">
       <label>Username</label>
       <input id="login-user" type="text" placeholder="admin" autocomplete="username">
@@ -1091,7 +1091,7 @@ select option { background: var(--bg2); }
 
 <script>
 /* ═══════════════════════════════════════════════════════════
-   WIKIFORGE — CONFIGURATION
+   BR.Wiki — CONFIGURATION
    Edit this section to add/change accounts and wikis.
    Passwords are SHA-256 hashed. To generate a hash:
    open browser console and run:
@@ -1105,20 +1105,16 @@ const WIKI_CONFIG = {
   accounts: [
     {
       username: "admin",
-      // Default password: "admin123" — CHANGE THIS before deploying!
-      passwordHash: "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+      passwordHash: "553affdb5a9a9491290e179a00e519e6386788686678f9f307331689d602ad8b",
       role: "admin",
       displayName: "Admin"
     },
     {
       username: "editor",
-      // Default password: "editor123" — CHANGE THIS before deploying!
-      passwordHash: "9ebb3df4d2d93f6bc10fba2fe3d0af2e75a41bbd3765b9bda1c21ea1deb21e87",
+      passwordHash: "553affdb5a9a9491290e179a00e519e6386788686678f9f307331689d602ad8b",
       role: "editor",
       displayName: "Editor"
     }
-    // Add more accounts here:
-    // { username: "alice", passwordHash: "...", role: "editor", displayName: "Alice" }
   ],
 
   // ── WIKI LIST ─────────────────────────────────────────────
@@ -1129,7 +1125,7 @@ const WIKI_CONFIG = {
   ],
 
   // ── SITE SETTINGS ────────────────────────────────────────
-  siteName: "WikiForge",
+  siteName: "BR.Wiki",
   allowPublicRead: true,   // false = require login to read
   defaultWiki: "main"
 };
@@ -1386,6 +1382,36 @@ const Parser = {
 
     return { html: toc + t, categories };
   }
+   
+  async parseAsync(wikitext, existingPages=[], wiki='') {
+     // Fetch any {{Template:X}} or {{X}} that match Template: pages
+     const templateNames = [...new Set([...wikitext.matchAll(/\{\{([^}|#]+)/g)].map(m=>m[1].trim()))];
+     const fetched = {};
+     await Promise.all(templateNames.map(async name => {
+       const key = `Template:${name}`;
+       if (existingPages.includes(key)) {
+         try {
+           const f = await GH.getFile(`${wiki}/${key.replace(/\s+/g,'_')}.wiki`);
+           if (f) fetched[name] = f.content;
+         } catch(e) {}
+       }
+     }));
+     // Substitute fetched templates
+     let t = wikitext;
+     Object.entries(fetched).forEach(([name, body]) => {
+       t = t.replace(new RegExp(`\\{\\{${name}([^}]*)\\}\\}`, 'gi'), (_, args) => {
+         let result = body;
+         // Handle named params: |key=value
+         [...args.matchAll(/\|\s*(\w+)\s*=\s*([^|}\n]+)/g)].forEach(([,k,v]) => {
+           result = result.replace(new RegExp(`\\{\\{\\{${k}\\}\\}\\}`, 'g'), v.trim());
+         });
+         // Replace any unfilled params with empty string
+         result = result.replace(/\{\{\{[^}]+\}\}\}/g, '');
+         return result;
+       });
+     });
+     return this.parse(t, existingPages);
+   },
 };
 
 
@@ -1564,7 +1590,7 @@ const Wiki = {
     const wiki = WikiApp.currentWiki;
     const page = WikiApp.currentPage;
     const filePath = `${wiki}/${page.replace(/\s+/g,'_')}.wiki`;
-    const commitMsg = `[${wiki}] ${summary} — ${page} (via WikiForge)`;
+    const commitMsg = `[${wiki}] ${summary} — ${page} (via BR.Wiki)`;
 
     try {
       // Get current SHA if exists
@@ -1688,13 +1714,13 @@ const WikiApp = {
     const wikis = this.getWikiList();
     const w = wikis.find(x=>x.id===this.currentWiki) || wikis[0];
     const pages = await this.getPageIndex();
-    const recent = Object.entries(pages).sort((a,b)=>(b[1].updated||0)-(a[1].updated||0)).slice(0,8);
-    const all = Object.keys(pages).slice(0,12);
+    const recent = Object.entries(pages).filter(([p])=>!p.startsWith('Template:')).sort((a,b)=>(b[1].updated||0)-(a[1].updated||0)).slice(0,8);
+    const all = Object.keys(pages).filter(p=>!p.startsWith('Template:')).slice(0,12);
 
     div.innerHTML = `
       <div class="home-hero">
-        <h1>${w?.name || 'WikiForge'}</h1>
-        <p>${w?.description || 'Welcome to your wiki.'} &nbsp; <strong>${Object.keys(pages).length}</strong> pages.</p>
+        <h1>${w?.name || 'BR.Wiki'}</h1>
+        <p>${w?.description || 'Welcome to your wiki.'} &nbsp; <strong>${Object.keys(pages).filter(p=>!p.startsWith('Template:')).length}</strong> pages.</p>
         ${Auth.canEdit ? `<button class="hbtn primary" style="margin-top:12px" onclick="WikiApp.showNewPageModal()">+ New page</button>` : ''}
       </div>
       <div class="home-grid">
@@ -1736,7 +1762,7 @@ const WikiApp = {
     try {
       const { wikitext, meta } = await this.loadPage(pageName);
       const allPages = this.allPageNames();
-      const { html, categories } = Parser.parse(wikitext, allPages);
+      const { html, categories } = await Parser.parseAsync(wikitext, allPages, WikiApp.currentWiki);
 
       document.getElementById('loading-view').style.display = 'none';
       const pv = document.getElementById('page-view');
@@ -1907,13 +1933,13 @@ const WikiApp = {
 
   allPageNames() {
     const index = this.indexCache[this.currentWiki] || {};
-    return Object.keys(index);
+    return Object.keys(index).filter(p=>!p.startsWith('Template:'));
   },
 
   // ── SIDEBAR ───────────────────────────────────────────────
   async loadSidebar() {
     const index = await this.getPageIndex();
-    const pages = Object.keys(index);
+    const pages = Object.keys(index).filter(p=>!p.startsWith('Template:'));
     const nav = document.getElementById('sidebar-nav');
 
     nav.innerHTML = `
@@ -2091,7 +2117,7 @@ const WikiApp = {
     if (!q) { results.style.display = 'none'; return; }
 
     const index = await this.getPageIndex();
-    const matches = Object.entries(index).filter(([name, meta]) =>
+    const matches = Object.entries(index).filter(([name])=>!name.startsWith('Template:')).filter(([name, meta]) =>
       name.toLowerCase().includes(q) ||
       (meta.excerpt||'').toLowerCase().includes(q) ||
       (meta.categories||[]).some(c=>c.toLowerCase().includes(q))
