@@ -1,4 +1,6 @@
 Epic game!
 
-
-Test Manage24roleProtagonistspeciesHumanaffiliationThe Orderfirst appearanceChapter 1statusAlive
+{{Infobox
+| name = Test Man
+| image = https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg
+}}
